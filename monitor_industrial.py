@@ -1,4 +1,4 @@
-#Commit 1
+#Commit 2
 
 from datetime import datetime
 
@@ -20,7 +20,7 @@ LEITURAS_MOTORES = [
     {"id": "MTR-04", "setor": "Pintura", "temperatura": 61.0, "corrente": 11.5, "vibracao": 1.8, "rpm": 1780, "potencia_kw": 7.5},
 ]
 
-#Commit 2
+#Commit 3
 
 def validar_leitura(motor):
     campos_obrigatorios = ["id", "setor", "temperatura", "corrente", "vibracao", "rpm", "potencia_kw"]
@@ -35,7 +35,7 @@ def validar_leitura(motor):
 def obter_leituras_validas(lista_motores):
     return [m for m in lista_motores if validar_leitura(m)]
 
-#Commit 3
+#Commit 4
 
     def analisar_alertas(motor):
         alertas = []
@@ -56,3 +56,23 @@ def obter_leituras_validas(lista_motores):
         status = "CRITICO"
 
     return status, alertas
+
+#Commit 5
+
+def calcular_estatisticas(motores):
+    total = len(motores)
+    if total == 0:
+        return {}
+
+    temp_media = sum(m["temperatura"] for m in motores) / total
+    corrente_media = sum(m["corrente"] for m in motores) / total
+    potencia_total = sum(m["potencia_kw"] for m in motores)
+    maior_temp = max(motores, key=lambda m: m["temperatura"])
+
+    return {
+        "total_motores": total,
+        "temperatura_media": round(temp_media, 2),
+        "corrente_media": round(corrente_media, 2),
+        "potencia_total_kw": round(potencia_total, 2),
+        "motor_mais_quente": maior_temp["id"],
+    }
