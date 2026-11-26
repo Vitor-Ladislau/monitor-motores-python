@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitoramento de Motores Industriais | WEG</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- Cabeçalho Institucional -->
+  <header class="topbar">
+    <div class="container topbar-content">
+      <div class="brand">
+        <span class="weg-badge">WEG</span>
+        <div class="brand-text">
+          <h1>Monitoramento de Motores Industriais</h1>
+          <p class="subtitle">SISTEMA_NOME • Telemetria, Validação de Sensores e Análise de Criticidade • Versão 1.0.0</p>
+        </div>
+      </div>
+      <div class="system-meta">
+        <span class="meta-item"><strong>Desenvolvido por:</strong> Vitor Ladislau Urnau</span>
+        <span class="meta-item"><strong>Módulo:</strong> <code>monitor_industrial.py</code> • Pipeline: Commits 2–8</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- 1. Estatísticas Operacionais da Planta (calcular_estatisticas) -->
+    <section class="section-block" aria-label="Estatísticas Operacionais">
+      <div class="section-title-row">
+        <h2>1. Estatísticas Operacionais da Planta — Retorno de <code>calcular_estatisticas(motores)</code></h2>
+        <span class="section-note">Arredondamento técnico: <code>round(valor, 2)</code></span>
+      </div>
+
+      <div class="kpi-grid">
+        <article class="kpi-card">
+          <span class="kpi-label">total_motores</span>
+          <strong class="kpi-value">4 unidades</strong>
+          <p class="kpi-detail">Total de dicionários aprovados em <code>obter_leituras_validas()</code></p>
+        </article>
+
+        <article class="kpi-card">
+          <span class="kpi-label">temperatura_media</span>
+          <strong class="kpi-value">72.58 °C</strong>
+          <p class="kpi-detail">Média aritmética: (68.4 + 84.7 + 76.2 + 61.0) / 4</p>
+        </article>
+
+        <article class="kpi-card">
+          <span class="kpi-label">corrente_media</span>
+          <strong class="kpi-value">15.7 A</strong>
+          <p class="kpi-detail">Média aritmética: (14.2 + 19.3 + 17.8 + 11.5) / 4</p>
+        </article>
+
+        <article class="kpi-card">
+          <span class="kpi-label">potencia_total_kw</span>
+          <strong class="kpi-value">31.5 kW</strong>
+          <p class="kpi-detail">Somatório de <code>potencia_kw</code>: 7.5 + 11.0 + 5.5 + 7.5 kW</p>
+        </article>
+
+        <article class="kpi-card kpi-alert">
+          <span class="kpi-label">motor_mais_quente</span>
+          <strong class="kpi-value">MTR-02 (84.7 °C)</strong>
+          <p class="kpi-detail">Identificado via <code>max(motores, key=lambda m: m["temperatura"])</code></p>
+        </article>
+      </div>
+    </section>
+
+    <!-- 2. Parâmetros Técnicos e Regras de Criticidade -->
+    <section class="panel-box" aria-label="Parâmetros e Regras">
+      <div class="panel-header">
+        <h2>2. Configurações de Sistema, Limites Técnicos e Regras de Negócio</h2>
+        <span class="tag-outline">Constantes: LIMITES &amp; Regras</span>
+      </div>
+
+      <div class="rules-grid">
+        <div class="rule-group">
+          <h3>Dicionário Global <code>LIMITES</code> (Thresholds de Alerta)</h3>
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>Variável</th>
+                <th>Chave Python</th>
+                <th>Condição de Disparo</th>
+                <th>Mensagem Gerada</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Temperatura</td>
+                <td><code>temperatura_max</code></td>
+                <td><code>&gt; 80.0 °C</code></td>
+                <td><code>Superaquecimento (X.X C)</code></td>
+              </tr>
+              <tr>
+                <td>Corrente Elétrica</td>
+                <td><code>corrente_max</code></td>
+                <td><code>&gt; 18.5 A</code></td>
+                <td><code>Sobrecorrente (X.X A)</code></td>
+              </tr>
+              <tr>
+                <td>Vibração Mecânica</td>
+                <td><code>vibracao_max</code></td>
+                <td><code>&gt; 4.5 mm/s</code></td>
+                <td><code>Vibracao elevada (X.X mm/s)</code></td>
+              </tr>
+              <tr>
+                <td>Rotação Mínima</td>
+                <td><code>rpm_min</code></td>
+                <td><code>&lt; 1400 RPM</code></td>
+                <td><code>Rotacao fora da faixa (X RPM)</code></td>
+              </tr>
+              <tr>
+                <td>Rotação Máxima</td>
+                <td><code>rpm_max</code></td>
+                <td><code>&gt; 1800 RPM</code></td>
+                <td><code>Rotacao fora da faixa (X RPM)</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="rule-group">
+          <h3>Regras de Validação e Classificação (<code>analisar_alertas</code>)</h3>
+          <ul class="spec-list">
+            <li>
+              <strong>Integridade de Campos (<code>validar_leitura</code>):</strong> Exige a presença não nula de 7 chaves obrigatórias: <code>id</code>, <code>setor</code>, <code>temperatura</code>, <code>corrente</code>, <code>vibracao</code>, <code>rpm</code> e <code>potencia_kw</code>.
+            </li>
+            <li>
+              <strong>Sanitização Numérica:</strong> Bloqueia leituras com valores físicos impossíveis (<code>temperatura &lt; 0</code>, <code>corrente &lt; 0</code>, <code>vibracao &lt; 0</code> ou <code>rpm &lt; 0</code>).
+            </li>
+            <li>
+              <strong>Classificação <code>NORMAL</code> (<code>len(alertas) == 0</code>):</strong> Nenhuma variável ultrapassou os limites definidos no dicionário <code>LIMITES</code>.
+            </li>
+            <li>
+              <strong>Classificação <code>ATENCAO</code> (<code>len(alertas) == 1</code>):</strong> Apenas 1 variável em desvio operacional; requer inspeção programada.
+            </li>
+            <li>
+              <strong>Classificação <code>CRITICO</code> (<code>len(alertas) &gt;= 2</code>):</strong> Múltiplas variáveis em desvio simultâneo; exige parada imediata.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Leituras dos Sensores e Diagnóstico Detalhado -->
+    <section class="panel-box" aria-label="Leituras dos Sensores">
+      <div class="panel-header">
+        <h2>3. Telemetria de Sensores e Diagnóstico — Lista <code>LEITURAS_MOTORES</code></h2>
+        <span class="tag-outline">4 Registros Processados</span>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th><code>id</code> / <code>setor</code></th>
+              <th><code>temperatura</code><br><small>(Máx: 80.0 °C)</small></th>
+              <th><code>corrente</code><br><small>(Máx: 18.5 A)</small></th>
+              <th><code>vibracao</code><br><small>(Máx: 4.5 mm/s)</small></th>
+              <th><code>rpm</code><br><small>(1400–1800 RPM)</small></th>
+              <th><code>potencia_kw</code></th>
+              <th>Retorno <code>alertas</code> (<code>analisar_alertas</code>)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- MTR-01 -->
+            <tr>
+              <td><span class="badge normal">NORMAL</span></td>
+              <td>
+                <strong>MTR-01</strong>
+                <span class="sector">Estamparia</span>
+              </td>
+              <td>68.4 °C <span class="delta ok">(-11.6 °C)</span></td>
+              <td>14.2 A <span class="delta ok">(-4.3 A)</span></td>
+              <td>2.1 mm/s <span class="delta ok">(-2.4 mm/s
